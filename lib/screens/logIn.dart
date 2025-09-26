@@ -21,11 +21,10 @@ class _LoginState extends State<Login> {
   final AuthService authService = AuthService();
 
   void _login() async {
-    // final email = emailController.text;
-    // final password = passwordController.text;
+    final email = emailController.text;
+    final password = passwordController.text;
 
-    final email = 'nevena01@gmail.com';
-    final password = 'Nevena123!';
+
 
     if (email.isEmpty && password.isEmpty) {
       _showErrorDialog('Email and password cannot be empty.');
