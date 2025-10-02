@@ -69,6 +69,8 @@ class _TicketsState extends State<Tickets> {
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'reserved':
+        return Colors.deepOrangeAccent;
+      case 'paid':
         return Colors.lightGreen;
       case 'confirmed':
         return Colors.lightBlue;

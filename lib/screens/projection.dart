@@ -137,13 +137,29 @@ class _ProjectionsState extends State<Projections> {
                             ),
                           ),
                           const SizedBox(height: 4),
-                          Text(
-                            formatProjectionDateTime(projection.dateTime),
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 14,
-                              height: 1.5,
-                            ),
+                          // Row za datum/vreme i cenu
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  formatProjectionDateTime(projection.dateTime),
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 14,
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                '💰 ${projection.price.toStringAsFixed(2)} RSD',
+                                style: const TextStyle(
+                                  color: Colors.orangeAccent,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),

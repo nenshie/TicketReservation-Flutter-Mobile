@@ -3,6 +3,8 @@ import 'package:cinema_reservations_front/screens/camera.dart';
 import 'package:cinema_reservations_front/screens/films.dart';
 import 'package:cinema_reservations_front/screens/logIn.dart';
 import 'package:cinema_reservations_front/screens/make_reservation.dart';
+import 'package:cinema_reservations_front/screens/online_payment.dart';
+import 'package:cinema_reservations_front/screens/payment_option.dart';
 import 'package:cinema_reservations_front/screens/profile.dart';
 import 'package:cinema_reservations_front/screens/sign_in.dart';
 import 'package:cinema_reservations_front/screens/tickets.dart';
@@ -56,6 +58,7 @@ class MyApp extends StatelessWidget {
         '/camera' : (context) =>  QRScannerScreen(),
         '/films' : (context) => const FilmsScreen(),
         '/add-projection' : (context) => const AddProjectionScreen(),
+        '/online-payment' : (context) => const OnlinePaymentPage()
       },
     );
   }

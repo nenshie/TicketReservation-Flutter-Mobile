@@ -4,13 +4,12 @@ import 'package:cinema_reservations_front/models/dto/ReservationDto.dart';
 import 'package:cinema_reservations_front/models/dto/SeatDto.dart';
 import 'package:http/http.dart' as http;
 
+import '../utils/api_handler.dart';
+
 class ReservationService {
-  static const String ipPort = "172.20.10.5:5215";
-  static const String baseUrl = "http://$ipPort/api/reservation";
 
-
-  Future<bool> makeReservation(String? userId, int projectionId, List<Seat> seats) async {
-    final url = Uri.parse("$baseUrl/make");
+  Future<int> makeReservation(String? userId, int projectionId, List<Seat> seats) async {
+    final url = Uri.parse('${BaseAPI.base}/reservations/make');
 
     final seatsJson = seats.map((seat) => seat.toJson()).toList();
 
@@ -33,14 +32,15 @@ class ReservationService {
     print('----------------------------');
 
     if (response.statusCode == 200) {
-      return true;
+      final data = json.decode(response.body);
+      return data['reservationId']; // vraća ID rezervacije
     } else {
       throw Exception('Failed to send reservation: ${response.statusCode} ${response.body}');
     }
   }
 
   Future<List<Projection>> fetchAllReservations() async {
-    final uri = Uri.parse(baseUrl);
+    final uri = Uri.parse('${BaseAPI.base}/reservations/get-all');
 
     final response = await http.get(uri);
 
@@ -59,48 +59,45 @@ class ReservationService {
   }
 
   Future<List<Reservation>> getMyReservations(String userId) async {
-    final uri = Uri.parse("$baseUrl/user/$userId");
+    final uri = Uri.parse('${BaseAPI.base}/reservations/user/$userId');
     final response = await http.get(uri);
 
-    // print('--- RESERVATION FETCH LOG ---');
-    // print("URL: $uri");
-    // print("Status code: ${response.statusCode}");
-    // print("Response body: ${response.body}");
-    // print('------------------------');
+    print('--- RESERVATION FETCH LOG ---');
+    print("URL: $uri");
+    print("Status code: ${response.statusCode}");
+    print("Response body: ${response.body}");
+    print('------------------------');
+
     if (response.statusCode == 200) {
       List data = json.decode(response.body);
       List<Reservation> allReservations = [];
-      for (var resJson in data) {
-        final ticket = resJson['ticket'];
-        final status = resJson['status'];
-        final projection = ticket?['projection'];
-        final film = projection?['film'];
-        final seats = ticket?['seats'] ?? [ticket?['seat']];
 
-        if (seats is List) {
-          for (var seat in seats) {
-            allReservations.add(
-              Reservation(
-                reservationId: ticket?['ticketId'] ?? 0,
-                filmTitle: film?['title'] ?? '',
-                date: (projection?['date'] ?? '').toString().substring(0, 10),
-                time: (projection?['time'] ?? '').toString().substring(11, 16),
-                status: status,
-                seats: ['Row ${seat["rowNumber"]}, Seat ${seat["seatNumber"]}'],
-                qrCodeBase64: ticket?['qrCode'],
-              ),
-            );
-          }
-        } else if (seats != null) {
+      for (var resJson in data) {
+        final status = resJson['status'];
+        final tickets = resJson['tickets'] as List? ?? [];
+
+        for (var t in tickets) {
+          final filmTitle = t['filmTitle'] ?? '';
+          final projectionDate = t['projectionDate'] ?? '';
+          final projectionTime = t['projectionTime'] ?? '';
+          final seatRow = t['seatRow'];
+          final seatNumber = t['seatNumber'];
+
           allReservations.add(
             Reservation(
-              reservationId: ticket?['ticketId'] ?? 0,
-              filmTitle: film?['title'] ?? '',
-              date: (projection?['date'] ?? '').toString().substring(0, 10),
-              time: (projection?['time'] ?? '').toString().substring(11, 16),
+              reservationId: resJson['reservationId'] ?? 0,
+              filmTitle: filmTitle,
+              date: projectionDate.toString().isNotEmpty
+                  ? projectionDate.toString().substring(0, 10)
+                  : '',
+              time: projectionTime.toString().isNotEmpty
+                  ? projectionTime.toString().substring(11, 16)
+                  : '',
               status: status,
-              seats: ['Row ${seats["rowNumber"]}, Seat ${seats["seatNumber"]}'],
-              qrCodeBase64: ticket?['qrCode'],
+              seats: seatRow != null && seatNumber != null
+                  ? ['Row $seatRow, Seat $seatNumber']
+                  : [],
+              qrCodeBase64: t['qrCode'],
             ),
           );
         }
@@ -111,8 +108,9 @@ class ReservationService {
     }
   }
 
+
   Future<bool> confirmReservationFromQr(String qrContent) async {
-    final url = Uri.parse("$baseUrl/confirm-from-qr");
+    final url = Uri.parse('${BaseAPI.base}/reservations/confirm-from-qr');
 
     final body = jsonEncode({
       'qrContent': qrContent
@@ -132,5 +130,28 @@ class ReservationService {
       return false;
     }
   }
+
+
+  Future<void> payReservation(int reservationId, String cardNumber, String expiryDate, String cvv) async {
+    final response = await http.post(
+      Uri.parse('${BaseAPI.base}/reservations/$reservationId/pay'),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "cardNumber": cardNumber,
+        "expiryDate": expiryDate,
+        "cvv": cvv,
+      }),
+    );
+
+    print('--- RESERVATION PAYMENT LOG ---');
+    print("Status code: ${response.statusCode}");
+    print("Response body: ${response.body}");
+    print('------------------------');
+
+    if (response.statusCode != 200) {
+      throw Exception(response.body.isNotEmpty ? response.body : "Unknown error");
+    }
+  }
+
 
 }

@@ -1,4 +1,5 @@
 class Seat {
+  final int seatId;
   final int roomId;
   final int projectionId;
   final int rowNumber;
@@ -6,6 +7,7 @@ class Seat {
   final bool isTaken;
 
   Seat({
+    required this.seatId,
     required this.roomId,
     required this.projectionId,
     required this.rowNumber,
@@ -15,6 +17,7 @@ class Seat {
 
   factory Seat.fromJson(Map<String, dynamic> json) {
     return Seat(
+      seatId: json['seatId'],
       roomId: json['roomId'],
       projectionId: json['projectionId'],
       rowNumber: json['rowNumber'],
@@ -25,6 +28,7 @@ class Seat {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': seatId,
       'roomId': roomId,
       'projectionId': projectionId,
       'rowNumber': rowNumber,

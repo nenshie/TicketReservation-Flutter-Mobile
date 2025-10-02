@@ -14,9 +14,9 @@ class OccupiedSeat {
   factory OccupiedSeat.fromJson(Map<String, dynamic> json) {
     return OccupiedSeat(
       seatId: json['seatId'],
-      row: json['row'],
-      column: json['column'],
-      isTaken: json['isTaken'],
+      row: json['rowNumber'],
+      column: json['seatNumber'],
+      isTaken: json['occupied'],
     );
   }
 }

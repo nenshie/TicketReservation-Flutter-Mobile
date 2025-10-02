@@ -1,10 +1,12 @@
 import 'package:cinema_reservations_front/components/bottom_nav_bar.dart';
 import 'package:cinema_reservations_front/models/dto/OccupiedSeatDto.dart';
+import 'package:cinema_reservations_front/models/dto/PaymentDto.dart';
 import 'package:cinema_reservations_front/models/dto/ProjectoinDto.dart';
+import 'package:cinema_reservations_front/screens/payment_option.dart';
 import 'package:cinema_reservations_front/services/SeatService.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../models/dto/SeatDto.dart';
 import '../providers/user_provider.dart';
 import '../services/ReservationService.dart';
@@ -24,7 +26,7 @@ class _MakeReservationState extends State<MakeReservation> {
 
   List<OccupiedSeat> takenSeats = [];
   bool isLoading = true;
-  List<String> selectedSeats = [];
+  List<OccupiedSeat> selectedSeats = [];
 
   @override
   void initState() {
@@ -50,49 +52,29 @@ class _MakeReservationState extends State<MakeReservation> {
     }
   }
 
-
   bool isSeatTaken(int rowNumber, int seatNumber) {
-    return takenSeats.any(
-            (seat) => seat.row == rowNumber && seat.column == seatNumber && seat.isTaken
+    return takenSeats.any((s) => s.row == rowNumber && s.column == seatNumber && s.isTaken);
+  }
+
+  bool isSeatSelected(int rowNumber, int seatNumber) {
+    return selectedSeats.any((s) => s.row == rowNumber && s.column == seatNumber);
+  }
+
+  void toggleSeatSelection(int rowNumber, int seatNumber) {
+    final seat = takenSeats.firstWhere(
+          (s) => s.row == rowNumber && s.column == seatNumber,
+      orElse: () => OccupiedSeat(seatId: -1, row: rowNumber, column: seatNumber, isTaken: false),
     );
-  }
 
-  String formatDuration(int minutes) {
-    final hours = minutes ~/ 60;
-    final remainingMinutes = minutes % 60;
+    if (seat.isTaken) return;
 
-    if (hours > 0 && remainingMinutes > 0) {
-      return '${hours}h ${remainingMinutes}m';
-    } else if (hours > 0) {
-      return '${hours}h';
-    } else {
-      return '${remainingMinutes}m';
-    }
-  }
-
-  // String formatProjectionDateTime(String rawDate, String rawTime) {
-  //   try {
-  //     final date = DateTime.parse(rawDate);
-  //     final time = DateTime.parse(rawTime);
-  //
-  //     final formattedDate =
-  //         '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
-  //     final formattedTime =
-  //         '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
-  //
-  //     return 'Date:  $formattedDate\nTime: $formattedTime';
-  //   } catch (e) {
-  //     return '$rawDate $rawTime';
-  //   }
-  // }
-
-  String formatProjectionDateTime(DateTime dateTime) {
-    final formattedDate =
-        '${dateTime.day.toString().padLeft(2, '0')}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.year}';
-    final formattedTime =
-        '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-
-    return 'Date: $formattedDate\nTime: $formattedTime';
+    setState(() {
+      if (isSeatSelected(rowNumber, seatNumber)) {
+        selectedSeats.removeWhere((s) => s.row == rowNumber && s.column == seatNumber);
+      } else {
+        selectedSeats.add(seat);
+      }
+    });
   }
 
   void _onNavBarTap(int index) {
@@ -116,10 +98,8 @@ class _MakeReservationState extends State<MakeReservation> {
   @override
   Widget build(BuildContext context) {
     final projection = ModalRoute.of(context)!.settings.arguments as Projection;
-    print('Number of rows: ${projection.room.numberOfRows}');
-    print('Seats per row: ${projection.room.seatsPerRow}');
 
-    final totalSeats = projection.room.numberOfRows * projection.room.seatsPerRow;
+    final seatsByRow = groupBy(takenSeats, (OccupiedSeat seat) => seat.row);
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -133,6 +113,7 @@ class _MakeReservationState extends State<MakeReservation> {
           ? const Center(child: CircularProgressIndicator())
           : Column(
         children: [
+          // Film info sa cenom
           Padding(
             padding: const EdgeInsets.all(15),
             child: Row(
@@ -145,12 +126,6 @@ class _MakeReservationState extends State<MakeReservation> {
                     width: 140,
                     height: 200,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      width: 120,
-                      height: 200,
-                      color: Colors.grey[800],
-                      child: const Icon(Icons.broken_image, color: Colors.white),
-                    ),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -167,18 +142,19 @@ class _MakeReservationState extends State<MakeReservation> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        formatDuration(projection.film.duration),
-                        style:
-                        const TextStyle(color: Colors.white70, fontSize: 18),
+                        '${projection.film.duration ~/ 60}h ${projection.film.duration % 60}m',
+                        style: const TextStyle(color: Colors.white70, fontSize: 18),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        formatProjectionDateTime(projection.dateTime),
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 16,
-                          height: 1.5,
-                        ),
+                        'Date: ${projection.dateTime.day.toString().padLeft(2,'0')}.${projection.dateTime.month.toString().padLeft(2,'0')}.${projection.dateTime.year}\n'
+                            'Time: ${projection.dateTime.hour.toString().padLeft(2,'0')}:${projection.dateTime.minute.toString().padLeft(2,'0')}',
+                        style: const TextStyle(color: Colors.white70, fontSize: 16, height: 1.5),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '💰 ${projection.price.toStringAsFixed(2)} RSD',
+                        style: const TextStyle(color: Colors.orangeAccent, fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -212,129 +188,89 @@ class _MakeReservationState extends State<MakeReservation> {
               ),
             ),
           ),
+          // Seats
           Expanded(
             child: SingleChildScrollView(
-              padding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: List.generate(
-                  projection.room.numberOfRows,
-                      (rowIndex) {
-                    final rowNumber = rowIndex + 1;
+                children: List.generate(projection.room.numberOfRows, (rowIndex) {
+                  final rowNumber = rowIndex + 1;
+                  final seatsInRow = seatsByRow[rowNumber] ??
+                      List.generate(projection.room.seatsPerRow,
+                              (index) => OccupiedSeat(seatId: -1, row: rowNumber, column: index + 1, isTaken: false));
 
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: LayoutBuilder(builder: (context, constraints) {
-                        const seatIconSize = 33.0;
-                        const seatPadding = 10.0;
-                        int seatsPerLine =
-                        (constraints.maxWidth / (seatIconSize + seatPadding))
-                            .floor();
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: seatsInRow.map((seat) {
+                        final taken = seat.isTaken;
+                        final selected = isSeatSelected(seat.row, seat.column);
 
-                        final maxSeatsInRow = projection.room.seatsPerRow;
-                        seatsPerLine = seatsPerLine > maxSeatsInRow
-                            ? maxSeatsInRow
-                            : seatsPerLine;
-
-                        List<Widget> seatLines = [];
-                        for (int startSeat = 0;
-                        startSeat < maxSeatsInRow;
-                        startSeat += seatsPerLine) {
-                          final endSeat = (startSeat + seatsPerLine > maxSeatsInRow)
-                              ? maxSeatsInRow
-                              : startSeat + seatsPerLine;
-                          final seatsInThisLine = endSeat - startSeat;
-
-                          seatLines.add(
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(seatsInThisLine, (index) {
-                                final seatNumberInRow = startSeat + index + 1;
-                                final seatId = '$rowNumber-$seatNumberInRow';
-
-                                final isTaken =
-                                isSeatTaken(rowNumber, seatNumberInRow);
-                                final isSelected = selectedSeats.contains(seatId);
-
-                                return GestureDetector(
-                                  onTap: () {
-                                    if (!isTaken) {
-                                      setState(() {
-                                        if (isSelected) {
-                                          selectedSeats.remove(seatId);
-                                        } else {
-                                          selectedSeats.add(seatId);
-                                        }
-                                      });
-                                    }
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(5.0),
-                                    child: Icon(
-                                      Icons.chair,
-                                      color: isTaken
-                                          ? Colors.grey
-                                          : isSelected
-                                          ? GlobalColors.red
-                                          : Colors.white,
-                                      size: seatIconSize,
-                                    ),
-                                  ),
-                                );
-                              }),
+                        return GestureDetector(
+                          onTap: () => toggleSeatSelection(seat.row, seat.column),
+                          child: Padding(
+                            padding: const EdgeInsets.all(5.0),
+                            child: Icon(
+                              Icons.chair,
+                              color: taken
+                                  ? Colors.grey
+                                  : selected
+                                  ? GlobalColors.red
+                                  : Colors.white,
+                              size: 33,
                             ),
-                          );
-                        }
-
-                        return Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: seatLines,
+                          ),
                         );
-                      }),
-                    );
-                  },
-                ),
+                      }).toList(),
+                    ),
+                  );
+                }),
               ),
             ),
           ),
-
+          // Reserve button
           if (selectedSeats.isNotEmpty)
             Padding(
               padding: const EdgeInsets.all(20),
               child: ElevatedButton(
                 onPressed: () async {
                   try {
-                    final user =
-                        Provider.of<UserProvider>(context, listen: false).user;
-                    final String? userId = user?.jmbg;
+                    final user = Provider.of<UserProvider>(context, listen: false).user;
+                    final userId = user?.jmbg;
+                    if (userId == null) throw Exception("User not logged in");
 
-                    List<Seat> seatsToReserve = selectedSeats.map((seatId) {
-                      final parts = seatId.split('-');
-                      final rowNumber = int.parse(parts[0]);
-                      final seatInRow = int.parse(parts[1]);
+                    final seatsToReserve = selectedSeats.map((s) => Seat(
+                      seatId: s.seatId,
+                      roomId: projection.room.roomId,
+                      projectionId: projection.projectionId,
+                      rowNumber: s.row,
+                      seatNumber: s.column,
+                      isTaken: false,
+                    )).toList();
 
-                      return Seat(
-                        roomId: projection.room.roomId,
-                        projectionId: projection.projectionId,
-                        rowNumber: rowNumber,
-                        seatNumber: seatInRow,
-                        isTaken: false,
-                      );
-                    }).toList();
-
-                    await reservationService.makeReservation(
-                        userId, projection.projectionId, seatsToReserve);
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content:
-                          Text("You have successfully booked your tickets!")),
+                    final reservationId = await reservationService.makeReservation(
+                      userId,
+                      projection.projectionId,
+                      seatsToReserve,
                     );
-                    Navigator.pushReplacementNamed(context, '/tickets');
-                    setState(() {
-                      selectedSeats.clear();
-                    });
+
+                    final paymentData = PaymentDto(
+                      reservationId: reservationId,
+                      movieTitle: projection.film.title,
+                      dateTime: projection.dateTime,
+                      ticketCount: selectedSeats.length,
+                      ticketPrice: projection.price,
+                    );
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => PaymentOptionPage(paymentData: paymentData),
+                      ),
+                    );
+
+                    setState(() => selectedSeats.clear());
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text("Booking error: $e")),
@@ -343,15 +279,10 @@ class _MakeReservationState extends State<MakeReservation> {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: GlobalColors.red,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 60, vertical: 16),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20)),
+                  padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 ),
-                child: const Text(
-                  "Reserve",
-                  style: TextStyle(fontSize: 20, color: Colors.white),
-                ),
+                child: const Text("Reserve", style: TextStyle(fontSize: 20, color: Colors.white)),
               ),
             ),
         ],
