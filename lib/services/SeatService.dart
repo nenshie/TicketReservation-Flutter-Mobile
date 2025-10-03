@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'package:cinema_reservations_front/models/dto/SeatDto.dart';
-import 'package:http/http.dart' as http;
 import 'package:cinema_reservations_front/models/dto/OccupiedSeatDto.dart';
+import 'package:http/http.dart' as http;
+
 import '../utils/api_handler.dart';
 
 class SeatService {

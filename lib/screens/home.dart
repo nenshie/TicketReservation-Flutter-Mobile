@@ -1,12 +1,13 @@
-import 'package:flutter/material.dart';
+import 'package:cinema_reservations_front/components/bottom_nav_bar.dart';
 import 'package:cinema_reservations_front/components/movie_card.dart';
 import 'package:cinema_reservations_front/utils/global_colors.dart';
-import 'package:cinema_reservations_front/components/bottom_nav_bar.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/user_provider.dart';
-import '../widgets/global_navbar.dart';
-import '../services/FilmService.dart';
+
 import '../models/dto/FilmDto.dart';
+import '../providers/user_provider.dart';
+import '../services/FilmService.dart';
+import '../widgets/global_navbar.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});

@@ -1,20 +1,20 @@
 import 'dart:io';
+
+import 'package:cinema_reservations_front/providers/user_provider.dart';
 import 'package:cinema_reservations_front/screens/camera.dart';
 import 'package:cinema_reservations_front/screens/films.dart';
+import 'package:cinema_reservations_front/screens/home.dart';
 import 'package:cinema_reservations_front/screens/logIn.dart';
 import 'package:cinema_reservations_front/screens/make_reservation.dart';
 import 'package:cinema_reservations_front/screens/online_payment.dart';
-import 'package:cinema_reservations_front/screens/payment_option.dart';
 import 'package:cinema_reservations_front/screens/profile.dart';
+import 'package:cinema_reservations_front/screens/projection.dart';
+import 'package:cinema_reservations_front/screens/projections.dart';
 import 'package:cinema_reservations_front/screens/sign_in.dart';
 import 'package:cinema_reservations_front/screens/tickets.dart';
-import 'package:flutter/material.dart';
 import 'package:cinema_reservations_front/screens/welcome_screen.dart';
-import 'package:cinema_reservations_front/screens/home.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cinema_reservations_front/providers/user_provider.dart';
-import 'package:cinema_reservations_front/screens/projections.dart';
-import 'package:cinema_reservations_front/screens/projection.dart';
 
 class MyHttpOverrides extends HttpOverrides {
   @override

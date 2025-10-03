@@ -34,7 +34,7 @@ class _SignInState extends State<SignIn> {
         // MobileNumber: phoneNumberController.text.trim(),
       );
 
-      // print('Podaci za registraciju: ${userData.email}, ${userData.MobileNumber}');
+       // print('Podaci za registraciju: ${userData.email}, ${userData.MobileNumber}');
 
       final authService = AuthService();
       final success = await authService.signUp(userData);

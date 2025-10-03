@@ -1,8 +1,5 @@
-import 'dart:ffi';
-
 import 'package:cinema_reservations_front/models/dto/FilmDto.dart';
 import 'package:cinema_reservations_front/models/dto/RoomDto.dart';
-import 'package:cinema_reservations_front/models/dto/GenreDto.dart';
 
 class Projection {
   final int projectionId;

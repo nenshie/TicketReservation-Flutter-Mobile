@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+
+import '../utils/global_colors.dart';
 import '../widgets/global_button.dart';
 import '../widgets/global_text_form.dart';
-import '../utils/global_colors.dart';
 
 class FilmsScreen extends StatefulWidget {
   const FilmsScreen({super.key});
