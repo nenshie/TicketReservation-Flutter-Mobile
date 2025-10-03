@@ -26,7 +26,6 @@ class _LoginState extends State<Login> {
 
     final email = 'nevena01@gmail.com';
     final password = 'Nevena123!';
-
     if (email.isEmpty && password.isEmpty) {
       _showErrorDialog('Email and password cannot be empty.');
       return;
@@ -43,16 +42,13 @@ class _LoginState extends State<Login> {
       if (response != null) {
         print('Login successful: ${response.jwtToken}');
 
-        // izvuci rolu
         final role = await authService.getUserRole(response.jwtToken) ?? "User";
         print('User role: $role');
         await authService.saveUserRole(role);
 
-        // sacuvaj token
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('jwtToken', response.jwtToken);
 
-        // izvuci korisnika direktno iz tokena
         final user = await authService.getUserFromJwt(response.jwtToken);
         if (user != null) {
           Provider.of<UserProvider>(context, listen: false).setUser(user);

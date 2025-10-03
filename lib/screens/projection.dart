@@ -54,20 +54,6 @@ class _ProjectionsState extends State<Projections> {
     }
   }
 
-  // String formatProjectionDateTime(String rawDate, String rawTime) {
-  //   try {
-  //     final date = DateTime.parse(rawDate);
-  //     final time = DateTime.parse(rawTime);
-  //
-  //     final formattedDate = '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
-  //     final formattedTime = '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
-  //
-  //     return '📅 $formattedDate\n🕒 $formattedTime';
-  //   } catch (e) {
-  //     return '$rawDate $rawTime';
-  //   }
-  // }
-
   String formatProjectionDateTime(DateTime dateTime) {
     final formattedDate =
         '${dateTime.day.toString().padLeft(2, '0')}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.year}';

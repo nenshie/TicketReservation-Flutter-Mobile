@@ -74,7 +74,7 @@ class AuthService {
   }
 
   Future<bool> signUp(User user) async {
-    final url = Uri.parse('${BaseAPI.base}/api/auth/register');
+    final url = Uri.parse('${BaseAPI.base}/auth/register');
 
     final response = await http.post(
       url,
@@ -85,7 +85,7 @@ class AuthService {
         'name': user.name,
         'surname': user.surname,
         'jmbg': user.jmbg,
-        'roles': [user.role.isNotEmpty ? user.role : 'Client'],
+        'roles':'CLIENT',
       }),
     );
 

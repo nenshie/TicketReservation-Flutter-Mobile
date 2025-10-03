@@ -26,8 +26,13 @@ class _OnlinePaymentPageState extends State<OnlinePaymentPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Online Payment'),
+        title: const Text(
+          'Online Payment',
+          style: TextStyle(color: Colors.grey),
+        ),
         backgroundColor: GlobalColors.black,
+        automaticallyImplyLeading: true,
+        iconTheme: const IconThemeData(color: Colors.grey),
       ),
       body: Stack(
         fit: StackFit.expand,

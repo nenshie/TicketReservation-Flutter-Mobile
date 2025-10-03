@@ -12,9 +12,13 @@ class PaymentOptionPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Choose Payment'),
+        title: const Text(
+          'Choose Payment',
+          style: TextStyle(color: Colors.grey),
+        ),
         backgroundColor: GlobalColors.black,
         automaticallyImplyLeading: true,
+        iconTheme: const IconThemeData(color: Colors.grey),
       ),
       body: Center(
         child: Column(

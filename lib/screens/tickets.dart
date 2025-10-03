@@ -72,7 +72,7 @@ class _TicketsState extends State<Tickets> {
         return Colors.deepOrangeAccent;
       case 'paid':
         return Colors.lightGreen;
-      case 'confirmed':
+      case 'verified':
         return Colors.lightBlue;
       default:
         return Colors.grey;

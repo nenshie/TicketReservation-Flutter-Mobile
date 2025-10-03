@@ -37,17 +37,17 @@ class ProjectionService {
     required TimeOfDay time,
   }) async {
 
-    final uri = Uri.parse('${BaseAPI.base}/films');
+    final uri = Uri.parse('${BaseAPI.base}/projections/create-projection');
 
-    final projectionDate = DateTime(date.year, date.month, date.day);
-
-    final projectionTime = DateTime(1, 1, 1, time.hour, time.minute);
+    final projectionDateTime = DateTime(
+        date.year, date.month, date.day, time.hour, time.minute
+    );
 
     final payload = {
       "filmId": filmId,
       "roomId": roomId,
-      "date": projectionDate.toIso8601String(),
-      "time": projectionTime.toIso8601String(),
+      "dateTime": projectionDateTime.toIso8601String(),
+
     };
 
     final response = await http.post(
@@ -59,6 +59,6 @@ class ProjectionService {
     print("POST Projection => ${response.statusCode}");
     print(response.body);
 
-    return response.statusCode == 201;
+    return response.statusCode == 200 || response.statusCode == 201;
   }
 }
